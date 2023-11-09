@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .login-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .login-container input {
+            margin-left: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username">
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password">
+
+            <input type="submit" value="Login">
+        </form>
+    </div>
+
+    <h1>Login please</h1>
+
+    <p id="viewConfidentialFileContainer" style="display:none;">
+        <a href="#" id="viewConfidentialFile">View Confidential File</a>
+    </p>
+
+    <script> 
+        document.cookie = "isAdmin=false";
+        
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    return cookie.substring(name.length + 1);
+                }
+            }
+            return null;
+        }
+
+        function checkIsAdmin() {
+            const isAdmin = document.cookie.split(';').some(cookie => cookie.trim().startsWith('isAdmin=true')); 
+            const viewConfidentialFileContainer = document.getElementById('viewConfidentialFileContainer');
+            // Display or hide the link based on the "isAdmin" cookie value
+            if (isAdmin) { 
+                viewConfidentialFileContainer.style.display = 'block';
+            } else {
+                viewConfidentialFileContainer.style.display = 'none';
+            }
+        }
+        checkIsAdmin(); 
+        setInterval(checkIsAdmin, 500);
+        // Event listener for the "View Confidential File" link
+        document.getElementById('viewConfidentialFile').addEventListener('click', function(event) {
+            // Prevent the default behavior of the link
+            event.preventDefault();
+
+            // Trigger a request to the server to check if the user has admin privileges
+            fetch('/confidential-file', {
+                method: 'GET',
+                credentials: 'same-origin', // Include cookies in the request
+            })
+            .then(response => {
+                if (response.ok) {
+                    // If the response is successful, open the confidential file in a new tab
+                    return response.text();
+                } else if (response.status === 403) {
+                    // If the user doesn't have admin privileges, show an alert
+                    alert('You do not have permission to view the confidential file.');
+                    throw new Error('Access forbidden');
+                } else {
+                    throw new Error('Failed to fetch the confidential file.');
+                }
+            })
+            .then(content => {
+                // Open the content in a new tab
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+        </script>
+</body>
+</html>
