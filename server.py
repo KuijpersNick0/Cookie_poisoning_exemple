@@ -7,8 +7,7 @@ class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.path = '/login.html'
-            return SimpleHTTPRequestHandler.do_GET(self)
-            return SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            return SimpleHTTPRequestHandler.do_GET(self) 
         if self.path == '/confidential-file':
             # Check if the "isAdmin" cookie is present and set to true
             isAdmin_cookie = self.headers.get('Cookie', '')
@@ -29,7 +28,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(b'Access forbidden')
         else:
             # Serve other files using the default handler
-            super().do_GET()
+            # super().do_GET()
+            self.path = '/login.html'
+            return SimpleHTTPRequestHandler.do_GET(self)
 
 PORT = 8000
 
