@@ -1,9 +1,14 @@
 # server.py
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+from http.server import SimpleHTTPRequestHandler, HTTPServer 
 import os
+from http.server import HTTPServer
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        if self.path == '/':
+            self.path = '/login.html'
+            return SimpleHTTPRequestHandler.do_GET(self)
+            return SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
         if self.path == '/confidential-file':
             # Check if the "isAdmin" cookie is present and set to true
             isAdmin_cookie = self.headers.get('Cookie', '')
